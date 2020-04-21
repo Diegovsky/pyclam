@@ -1,31 +1,30 @@
 import subprocess
-from pathlib import PurePosixPath as Path
+import pathlib
 import os.path
 import os
 
 HOME = os.getenv("HOME")
 PATH = os.getenv("PATH")
-# !
-async_off = True
-
 
 # A class wrapper which does system calls and handles errors
-class SafeCaller:
+class Clam:
+    # This will be used to buffer stdout from processes
+    _result = b""
+
     def __init__(self, cwd="$HOME", err=None):
-        self.err = err if err else SafeCaller.default_handler
+        self.handle = err if err else Clam.default_handler
         self.cwd = parse(cwd)
 
-    # This is the default function called in case a call returns an error.
+    # This is the default function called in case a command returns an error.
     @staticmethod
     def default_handler(caller, cmd):
-        if input("{} was not successful, try again? [Y/n] ".format(cmd)).strip().lowercase() == "y":
+        if input("{} was not successful, try again? [Y/n] ".format(cmd)).strip().lower() == "y":
             caller.call(cmd)
         else:
             exit(1)
 
-    # The function which actually does everything.
     def call(self, *cmd):
-        # This splits each argument into a list of strings separated by space,
+        # Splits each argument into a list of strings separated by space,
         # then join each list into one big list.
         cmd = [x
                for arg in cmd
@@ -33,31 +32,39 @@ class SafeCaller:
 
         # !TODO remove logging
         print("Running: {}".format(cmd))
+
+        # As this class is designed to work like a safe shell,
+        # most exceptions are just printed and the program goes on.
         try:
             # Runs cmd at the cwd 'self.cwd'
-            process = subprocess.Popen(cmd, cwd=self.cwd, env={"PATH": PATH})
-            if async_off:
-                process.wait()
+            process = subprocess.Popen(cmd, cwd=self.cwd, env={"PATH": PATH}, stdout=subprocess.PIPE)
+            self._result = process.communicate()[0]
+            process.wait()
         except subprocess.CalledProcessError:
-            self.err(cmd)
+            self.handle(cmd)
         except Exception as e:
             print(e)
         return self
 
-    # Emulates the cd command from a shell.
+    # Emulates the cd command from a shell
     def cd(self, cwd):
         self.cwd /= parse(cwd)
         return self
 
-    # Set the error handler function
-    def set_error(self, func):
-        self.err = func
+    # Sets the error handler function
+    def set_handler(self, func):
+        self.handle = func
+        return self
+
+    # Prints stdout
+    def show(self):
+        print(self._result.decode("utf-8"))
         return self
 
 
-# Utility function to parse strings into os path
+# Utility function to parse strings into paths
 def parse(location):
-    return Path(os.path.expandvars(location))
+    return pathlib.PosixPath(os.path.expandvars(location)).expanduser()
 
 
 # If you need something like "echo 'thing' >> .bashrc"
@@ -73,7 +80,3 @@ def append_from(source, target):
     target = parse(target)
     with open(source, "r") as file:
         append(target, *file.readlines(), end="")
-
-def setenv(key, val):
-    os.environ[key] = val
-

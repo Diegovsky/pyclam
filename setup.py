@@ -1,12 +1,13 @@
 import setuptools
 
 setuptools.setup(
-    name='Pysea',
+    name='PyClam',
     version='1.2',
     packages=setuptools.find_packages(),
     author="Diegovsky",
     license="None",
-    py_modules=["PySea"],
-    description="Shell Emulation Assistant",
+    scripts=["PyClam"],
+    description="Shell-like system caller",
+    long_description="A thin wrapper around Popen that aims to look like a shell",
     url="https://github.com/Diegovsky/pysea",
 )
