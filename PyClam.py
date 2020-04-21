@@ -1,10 +1,10 @@
 import subprocess
 import pathlib
-import os.path
 import os
 
 HOME = os.getenv("HOME")
 PATH = os.getenv("PATH")
+
 
 # A class wrapper which does system calls and handles errors
 class Clam:
@@ -65,18 +65,3 @@ class Clam:
 # Utility function to parse strings into paths
 def parse(location):
     return pathlib.PosixPath(os.path.expandvars(location)).expanduser()
-
-
-# If you need something like "echo 'thing' >> .bashrc"
-def append(filepath, *args, end="\n"):
-    args = [x+end for x in args]
-    with open(parse(filepath), "a") as file:
-        file.writelines(args)
-
-
-# If you find yourself wanting to use something like "cat example >> .bashrc"
-def append_from(source, target):
-    source = parse(source)
-    target = parse(target)
-    with open(source, "r") as file:
-        append(target, *file.readlines(), end="")

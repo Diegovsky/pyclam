@@ -9,5 +9,5 @@ setuptools.setup(
     scripts=["PyClam"],
     description="Shell-like system caller",
     long_description="A thin wrapper around Popen that aims to look like a shell",
-    url="https://github.com/Diegovsky/pysea",
+    url="https://github.com/Diegovsky/pyclam",
 )
