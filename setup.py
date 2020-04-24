@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='PyClam',
-    version='1.2',
+    version='1.3.5',
     packages=setuptools.find_packages(),
     author="Diegovsky",
     license="None",

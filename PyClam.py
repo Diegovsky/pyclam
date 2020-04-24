@@ -64,4 +64,4 @@ class Clam:
 
 # Utility function to parse strings into paths
 def parse(location):
-    return pathlib.PosixPath(os.path.expandvars(location)).expanduser()
+    return pathlib.PosixPath(
